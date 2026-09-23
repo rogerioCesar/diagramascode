@@ -1,0 +1,23 @@
+flowchart LR
+    paciente[Pessoa paciente]
+    recepcao[Recepção]
+    identidade[(Provedor de identidade)]
+    mensagens[(Provedor de e-mail/SMS)]
+
+    subgraph agenda[AgendaSaude]
+        web[Portal web]
+        api[API de agendamento]
+        worker[Processador de notificações]
+        db[(Banco de dados)]
+        auditoria[(Registro de auditoria)]
+    end
+
+    paciente -->|consulta horários e agenda| web
+    recepcao -->|administra agenda e consultas| web
+    web -->|HTTPS| api
+    api -->|autentica/autoriza| identidade
+    api -->|lê e grava consultas| db
+    api -->|registra alterações| auditoria
+    api -->|publica evento de confirmação| worker
+    worker -->|envia confirmação| mensagens
+    worker -->|atualiza status técnico| db

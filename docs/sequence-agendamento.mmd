@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor P as Pessoa paciente
+    participant W as Portal web
+    participant A as API de agendamento
+    participant D as Banco de dados
+    participant N as Processador de notificações
+    participant M as Provedor de mensagens
+
+    P->>W: Seleciona unidade, especialidade e horário
+    W->>A: Consulta disponibilidade
+    A->>D: Busca agenda e consultas existentes
+    D-->>A: Horários livres
+    A-->>W: Exibe opções
+    P->>W: Confirma horário e dados mínimos
+    W->>A: Solicita criação da consulta
+    A->>D: Verifica conflito e grava consulta confirmada
+    D-->>A: Consulta criada
+    A-)N: Publica evento de confirmação
+    A-->>W: Retorna confirmação e identificador
+    W-->>P: Exibe consulta confirmada
+    N->>M: Solicita envio de mensagem
+    M-->>N: Retorna aceite ou falha técnica
+    N->>D: Registra status da notificação
