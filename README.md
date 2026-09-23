@@ -133,15 +133,4 @@ Eu precisei ajustar a fronteira do sistema e impedir que o diagrama tratasse a e
 
 Para um agente construir o sistema sem inventar decisões, esta documentação ainda precisa de: histórias de usuário e critérios de aceite; glossário; modelo de domínio; contrato de API; estados e transições do agendamento; matriz de permissões; regras de timezone e recorrência; requisitos não funcionais mensuráveis; decisões sobre provedor e infraestrutura; exemplos de erros; dados de teste; e política de observabilidade, backup, retenção e recuperação.
 
-## 6. Sugestão para um colega
 
-A visita ao repositório de um colega deve ser registrada aqui com o link e uma sugestão concreta. Como este ambiente não recebeu o link de um repositório de colega, essa etapa precisa ser completada pelo autor antes da entrega. Uma sugestão adequada seria verificar se o diagrama mostra claramente o limite do sistema e se as decisões não inferidas estão registradas no README.
-
-## 7. Status
-
-- [x] descrição em linguagem natural;
-- [x] diagrama estrutural em Mermaid;
-- [x] diagrama comportamental em Mermaid;
-- [x] decisões e ajustes sobre a geração da IA;
-- [x] publicação em repositório GitHub público;
-- [ ] visita e sugestão em repositório de colega.
