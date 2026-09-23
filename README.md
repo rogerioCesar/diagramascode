@@ -143,5 +143,5 @@ A visita ao repositório de um colega deve ser registrada aqui com o link e uma 
 - [x] diagrama estrutural em Mermaid;
 - [x] diagrama comportamental em Mermaid;
 - [x] decisões e ajustes sobre a geração da IA;
-- [ ] publicação em repositório GitHub público;
+- [x] publicação em repositório GitHub público;
 - [ ] visita e sugestão em repositório de colega.
