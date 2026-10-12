@@ -133,4 +133,76 @@ Eu precisei ajustar a fronteira do sistema e impedir que o diagrama tratasse a e
 
 Para um agente construir o sistema sem inventar decisões, esta documentação ainda precisa de: histórias de usuário e critérios de aceite; glossário; modelo de domínio; contrato de API; estados e transições do agendamento; matriz de permissões; regras de timezone e recorrência; requisitos não funcionais mensuráveis; decisões sobre provedor e infraestrutura; exemplos de erros; dados de teste; e política de observabilidade, backup, retenção e recuperação.
 
+## 6. Toy problem: reposicao de estoque
 
+### Problema e contrato
+
+Receber uma sequência fictícia de produtos e devolver uma lista de reposição. Cada produto tem nome, quantidade disponível e estoque mínimo.
+
+- **Entrada:** iterável de `ProdutoEstoque(nome, quantidade_disponivel, estoque_minimo)`.
+- **Saída:** lista ordenada de `ItemReposicao(nome_produto, quantidade_repor)`; inclui apenas itens abaixo do mínimo.
+- **Regra:** `quantidade_repor = estoque_minimo - quantidade_disponivel` quando disponível < mínimo.
+- **Limite:** no mínimo exato ou acima, não incluir o produto; iterável vazio retorna `[]`.
+- **Validação:** nome deve ser texto não vazio; quantidades devem ser inteiros não negativos. Tipos incompatíveis geram `TypeError`; valores inválidos, `ValueError`. Booleanos não são aceitos como inteiros. A ordem original e o texto do nome são preservados.
+
+Exemplos esperados:
+
+```python
+calcular_reposicao([ProdutoEstoque("Cafe", 3, 10)])
+# [ItemReposicao(nome_produto='Cafe', quantidade_repor=7)]
+
+calcular_reposicao([ProdutoEstoque("Cha", 10, 10)])  # []: no limite
+calcular_reposicao([])  # []: sem produtos
+ProdutoEstoque("Cafe", -1, 10)  # ValueError
+ProdutoEstoque("Cafe", 3, 2.5)  # TypeError
+```
+
+### Orientações de geração
+
+Instrução usada para guiar a implementação e a revisão:
+
+> Implemente em Python uma função para a especificação de reposição acima. Use nomes claros em português, funções com uma responsabilidade, comentários apenas para lógica não óbvia e erros explícitos com mensagens acionáveis. Preserve a ordem de entrada. Separe erros de tipo (`TypeError`) de valores inválidos (`ValueError`), rejeite `bool` como quantidade inteira e valide todos os dados antes de calcular. Não inclua credenciais ou dados reais. Use somente a biblioteca padrão; não adicione dependências sem necessidade. Escreva testes para casos normais, limites e erros. Não altere as regras de negócio.
+
+O agente específico **“Desenvolvedor de Software” do Fórum 1** não estava disponível na lista de agentes desta sessão. Por isso, não atribuo a ele a autoria da implementação. A solução foi elaborada com as instruções acima e submetida a uma revisão independente disponível nesta sessão.
+
+### Revisão crítica
+
+Na leitura própria, verifiquei se os nomes descreviam os conceitos, se a função principal tinha responsabilidade única, se os comentários eram necessários, se os erros eram previsíveis, se os dados eram validados, se havia segredos e se dependências externas eram justificáveis. `ProdutoEstoque` valida seus dados; `calcular_reposicao` percorre, seleciona e calcula; `ItemReposicao` representa a saída. Não há comentários narrativos, credenciais nem dependências de terceiros.
+
+A revisão independente apontou:
+
+- **[bloqueia]** `reposicao_estoque.py`, validação de `nome`: o teste combinado classificava nome de tipo incorreto como `ValueError`, embora a instrução defina `TypeError` para tipo incompatível e `ValueError` para texto vazio. Isso afeta o contrato de erro, não o cálculo de reposição.
+
+Aceitei o apontamento. Antes, tipo incorreto e texto vazio compartilhavam uma condição e a mesma exceção:
+
+```python
+if not isinstance(self.nome, str) or not self.nome.strip():
+    raise ValueError("nome deve ser um texto nao vazio")
+```
+
+Depois, os casos têm validações distintas e teste próprio:
+
+```python
+if not isinstance(self.nome, str):
+    raise TypeError("nome deve ser um texto")
+if not self.nome.strip():
+    raise ValueError("nome deve ser um texto nao vazio")
+```
+
+Também ampliei os testes para cobrir estoque mínimo negativo. A revisão não sugeriu mudanças que alterassem as regras de negócio. Nenhum ajuste foi feito apenas para reduzir linhas ou multiplicar funções.
+
+### Verificação
+
+Executado com Python 3 usando apenas a biblioteca padrão:
+
+```text
+python3 -m unittest -v test_reposicao_estoque
+Ran 12 tests in 0.001s
+OK
+```
+
+Os testes cobrem quantidade de reposição, ordem, igualdade ao mínimo, acima do mínimo, lista vazia, quantidades negativas, tipos inválidos, booleano, nome vazio e item/coleção de tipo incorreto. A verificação de sintaxe do Pylance também não encontrou erros nos dois arquivos Python.
+
+### Reflexão para a equipe
+
+Eu incorporaria à geração e revisão um contrato explícito entre **tipo inválido** e **valor inválido**, junto com testes derivados dos exemplos e limites da regra de negócio. Isso reduz ambiguidades em APIs e torna os erros verificáveis. Para colocar em prática, a equipe precisaria incluir esses critérios nos prompts/templates de tarefa e reservar uma etapa curta de revisão de contrato e testes no pull request, antes da aprovação; os testes automatizados devem rodar no CI.

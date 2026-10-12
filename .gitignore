@@ -5,3 +5,7 @@ Thumbs.db
 # Editores
 .vscode/
 .idea/
+
+# Python
+__pycache__/
+*.py[cod]
